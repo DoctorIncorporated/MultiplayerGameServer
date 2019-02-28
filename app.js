@@ -18,13 +18,15 @@ io.on('connection', function(socket){
     };
 
     players[thisPlayerId] = player;
-
+    socket.emit('register', {id:thisPlayerId});
     socket.broadcast.emit('spawn', {id:thisPlayerId});
-    console.log("Sending Spawn to New With ID", thisPlayerId);
 
-    for(var i = 0; i < players.length; i++){
-        socket.emit('spawn');
+    for(var playerId in players){
+        if(playerId == thisPlayerId)
+            continue;
 
+        socket.emit('spawn', {id:thisPlayerId});
+        console.log("Sending Spawn to New With ID", thisPlayerId);
     }
 
     socket.on('sayhello', function(data){
@@ -34,12 +36,18 @@ io.on('connection', function(socket){
 
     socket.on('disconnect', function(){
         console.log("Player Disconnected");
-        playerCount--;
+        delete players[thisPlayerId];
+        socket.broadcast.emit('disconnected', {id: thisPlayerId});
     });
 
     socket.on('move', function(data){
         data.id = thisPlayerId;
         console.log("Player Moved", JSON.stringify(data));
         socket.broadcast.emit('move', data);
+    });
+
+    socket.on('updatePosition', function(data){
+        data.id = thisPlayerId;
+        socket.broadcast.emit('updatePosition', data);
     });
 });
