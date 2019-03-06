@@ -20,6 +20,8 @@ io.on('connection', function(socket){
     players[thisPlayerId] = player;
     socket.emit('register', {id:thisPlayerId});
     socket.broadcast.emit('spawn', {id:thisPlayerId});
+    socket.broadcast.emit('requestPosition');
+
 
     for(var playerId in players){
         if(playerId == thisPlayerId)
